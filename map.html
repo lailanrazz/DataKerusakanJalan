@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sebaran Pelaporan Kerusakan Jalan</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css">
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+    }
+
+    /* Card style for title */
+    .title-card {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #19673d; /* Dark Green background */
+      color: #ffdf39; /* Yellow text */
+      padding: 8px 16px;
+      font-size: 18px; /* Smaller font size */
+      font-weight: bold;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+    }
+
+    .popup-img {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Title card overlay -->
+  <div class="title-card">
+    Sebaran Pelaporan Kerusakan Jalan
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+  <script>
+    // Inisialisasi peta
+    var map = L.map('map').setView([-7.797068, 110.370529], 12);
+
+    // Menambahkan basemap
+    var basemap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18
+    }).addTo(map);
+
+    // Tombol untuk memuat ulang
+    var showExport = '<button onclick="loadlayer()" title="Reload map" class="">Reload</button>';
+    var showExportButton = new L.Control({ position: "topright" });
+    showExportButton.onAdd = function (map) {
+      this._div = L.DomUtil.create('div');
+      this._div.innerHTML = showExport;
+      return this._div;
+    };
+    showExportButton.addTo(map);
+
+    // Fungsi untuk memuat layer marker dari DataKerusakan.json
+    function loadlayer() {
+      var markerClusterGroup = L.markerClusterGroup();
+
+      // Mengambil data JSON dari file DataKerusakan.json
+      fetch('DataKerusakan.json')
+        .then(response => response.json())
+        .then(data => {
+          // Menambahkan marker ke peta berdasarkan data JSON
+          data.features.forEach(function (feature) {
+            var popupContent = "<h4>" + feature.properties.nama + "</h4>" +
+              "<p>" + feature.properties.deskripsi + "</p>" +
+              "<p><strong>Tingkat Kerusakan:</strong> " + feature.properties.tingkat_kerusakan + "</p>" +
+              "<p><strong>Waktu Dilaporkan:</strong> " + feature.properties.waktu_dilaporkan + "</p>" +
+              // Menyisipkan gambar di dalam popup
+              "<img src='" + feature.properties.gambar + "' class='popup-img' alt='Gambar Kerusakan'>";
+
+            // Membuat marker untuk setiap fitur dan menambahkannya ke grup marker
+            var marker = L.marker(new L.LatLng(feature.geometry.coordinates[1], feature.geometry.coordinates[0]))
+              .bindPopup(popupContent);
+            markerClusterGroup.addLayer(marker);
+          });
+
+          // Menambahkan grup marker ke peta
+          map.addLayer(markerClusterGroup);
+          // Menyesuaikan tampilan peta untuk memasukkan semua marker
+          map.fitBounds(markerClusterGroup.getBounds());
+        })
+        .catch(error => console.error('Error loading JSON data:', error));
+    }
+
+    // Memuat marker saat halaman pertama kali dimuat
+    loadlayer();
+  </script>
+</body>
+
+</html>
