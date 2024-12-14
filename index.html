@@ -1,241 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>InfraGO - Pelaporan Kerusakan Jalan</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-    />
-    <style>
-      body {
-        background-color: #19673d;
-        color: #ffdf39;
-      }
-      #map {
-        width: 100%;
-        height: 400px;
-        margin-bottom: 15px;
-        border: 2px solid #ffdf39;
-      }
-      #photoPreview {
-        max-width: 100%;
-        max-height: 200px;
-        display: none;
-        margin-top: 10px;
-      }
-      .progress {
-        display: none;
-        margin-top: 10px;
-      }
-      .btn-primary {
-        background-color: #ffdf39;
-        border-color: #ffdf39;
-        color: #19673d;
-      }
-      .btn-primary:hover {
-        background-color: #ffd74f;
-        border-color: #ffd74f;
-      }
-      .card {
-        border-color: #ffdf39;
-      }
-      .form-control {
-        background-color: #ffffff;
-        border: 1px solid #ffdf39;
-      }
-      .form-control:focus {
-        border-color: #ffd74f;
-        box-shadow: 0 0 5px #ffd74f;
-      }
-      label {
-        color: #28a745;
-      }
-      .popup-content {
-        color: #19673d;
-        font-size: 12px;
-        max-width: 200px;
-        padding: 10px;
-      }
-      .popup-content h5 {
-        color: #28a745;
-        font-size: 14px;
-        margin-bottom: 5px;
-      }
-      .popup-content img {
-        max-width: 100%;
-        height: auto;
-        margin-top: 10px;
-        border: 2px solid #28a745;
-      }
-      .popup-content button {
-        background-color: #28a745;
-        border: none;
-        color: white;
-        padding: 5px 10px;
-        margin-top: 5px;
-        cursor: pointer;
-        border-radius: 4px;
-        font-size: 12px;
-      }
-      .popup-content button:hover {
-        background-color: #19673d;
-      }
-      .logo {
-        width: 120px; /* Adjust size of logo */
-        height: 120px;
-        display: block;
-        margin: 0 auto 10px auto; /* Center the logo */
-      }
-    </style>
-  </head>
 
-  <body>
-    <div class="container mt-4">
-      <!-- Logo section -->
-      <div class="text-center">
-        <img src="infrago-highres-logo.png" alt="Logo" class="logo" /> <!-- Your logo here -->
-      </div>
-      
-      <!-- Title section -->
-      <h2 class="text-center">InfraGO - Pelaporan Kerusakan Jalan</h2>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InfraGO - Pelaporan Kerusakan Jalan</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    body {
+      background-color: #19673d;
+      margin-bottom: 100px;
+      /* Add margin at the bottom */
+    }
 
-      <div class="card mt-4">
-        <div class="card-body">
-          <form id="reportForm">
-            <div class="form-group">
-              <label for="name">Nama Pelapor</label>
-              <input
-                type="text"
-                class="form-control"
-                id="name"
-                placeholder="Masukkan nama Anda"
-                required
-              />
-            </div>
+    #map {
+      width: 100%;
+      height: 400px;
+      margin-bottom: 15px;
+      border: 2px solid #ffdf39;
+    }
 
-            <div class="form-group">
-              <label for="description">Deskripsi Kerusakan</label>
-              <textarea
-                class="form-control"
-                id="description"
-                placeholder="Deskripsikan kerusakan jalan"
-                rows="3"
-                required
-              ></textarea>
-            </div>
+    #photoPreview {
+      max-width: 100%;
+      max-height: 200px;
+      display: none;
+      margin-top: 10px;
+    }
 
-            <div class="form-group">
-              <label for="damageLevel">Tingkatan Kerusakan</label>
-              <select class="form-control" id="damageLevel" required>
-                <option value="parah">Kerusakan Parah</option>
-                <option value="sedang">Kerusakan Sedang</option>
-                <option value="ringan">Kerusakan Ringan</option>
-              </select>
-            </div>
+    .progress {
+      display: none;
+      margin-top: 10px;
+    }
 
-            <div class="form-group">
-              <label for="photo">Unggah Foto</label>
-              <input
-                type="file"
-                class="form-control-file"
-                id="photo"
-                accept="image/*"
-                capture="camera"
-                required
-              />
-              <img id="photoPreview" alt="Preview Foto" />
-            </div>
+    .btn-primary {
+      background-color: #ffdf39;
+      border-color: #ffdf39;
+      color: #19673d;
+    }
 
-            <div class="form-group">
-              <label>Lokasi</label>
-              <div id="map"></div>
-              <small class="form-text text-muted">
-                Lokasi Anda akan diisi secara otomatis, atau Anda dapat memindahkan marker untuk menyesuaikan lokasi.
-              </small>
-              <input type="hidden" id="latitude" name="latitude" />
-              <input type="hidden" id="longitude" name="longitude" />
-            </div>
+    .btn-primary:hover {
+      background-color: #ffd74f;
+      border-color: #ffd74f;
+    }
 
-            <button type="submit" class="btn btn-primary btn-block">Laporkan</button>
-          </form>
-        </div>
-      </div>
+    .card {
+      border-color: #ffdf39;
+    }
+
+    .form-control {
+      background-color: #ffffff;
+      border: 1px solid #ffdf39;
+    }
+
+    .form-control:focus {
+      border-color: #ffd74f;
+      box-shadow: 0 0 5px #ffd74f;
+    }
+
+    label {
+      color: #28a745;
+    }
+
+    .popup-content {
+      color: #19673d;
+      font-size: 12px;
+      max-width: 200px;
+      padding: 10px;
+    }
+
+    .popup-content h5 {
+      color: #28a745;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .popup-content img {
+      max-width: 100%;
+      height: auto;
+      margin-top: 10px;
+      border: 2px solid #28a745;
+    }
+
+    .popup-content button {
+      background-color: #28a745;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      margin-top: 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .popup-content button:hover {
+      background-color: #19673d;
+    }
+
+    .logo {
+      width: 120px;
+      /* Adjust size of logo */
+      height: 120px;
+      display: block;
+      margin: 0 auto 10px auto;
+      /* Center the logo */
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-4">
+    <!-- Logo section -->
+    <div class="text-center">
+      <img src="infrago-highres-logo.png" alt="Logo" class="logo" /> <!-- Your logo here -->
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-      // Initialize map
-      const map = L.map("map").setView([0, 0], 15);
-      let marker;
-      let reportId = 1; // Initialize report ID
-      let reports = []; // Array to store report data
-      let markers = {}; // Object to store markers with reportId as key
+    <!-- Title section -->
+    <h2 class="text-center">InfraGO - Pelaporan Kerusakan Jalan</h2>
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(map);
+    <div class="card mt-4">
+      <div class="card-body">
+        <form id="reportForm">
+          <div class="form-group">
+            <label for="name">Nama Pelapor</label>
+            <input type="text" class="form-control" id="name" placeholder="Masukkan nama Anda" required />
+          </div>
 
-      // Geolocation
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          map.setView([latitude, longitude], 15);
-          marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
-          document.getElementById("latitude").value = latitude;
-          document.getElementById("longitude").value = longitude;
+          <div class="form-group">
+            <label for="description">Deskripsi Kerusakan</label>
+            <textarea class="form-control" id="description" placeholder="Deskripsikan kerusakan jalan" rows="3"
+              required></textarea>
+          </div>
 
-          marker.on("dragend", function (e) {
-            const { lat, lng } = e.target.getLatLng();
-            document.getElementById("latitude").value = lat;
-            document.getElementById("longitude").value = lng;
-          });
-        },
-        (error) => {
-          alert("Tidak dapat mengakses lokasi. Pastikan GPS Anda aktif.");
+          <div class="form-group">
+            <label for="damageLevel">Tingkatan Kerusakan</label>
+            <select class="form-control" id="damageLevel" required>
+              <option value="parah">Kerusakan Parah</option>
+              <option value="sedang">Kerusakan Sedang</option>
+              <option value="ringan">Kerusakan Ringan</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="photo">Unggah Foto</label>
+            <input type="file" class="form-control-file" id="photo" accept="image/*" capture="camera" required />
+            <img id="photoPreview" alt="Preview Foto" />
+          </div>
+
+          <div class="form-group">
+            <label>Lokasi</label>
+            <div id="map"></div>
+            <small class="form-text text-muted">
+              Lokasi Anda akan diisi secara otomatis, atau Anda dapat memindahkan marker untuk menyesuaikan lokasi.
+            </small>
+            <input type="hidden" id="latitude" name="latitude" />
+            <input type="hidden" id="longitude" name="longitude" />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Laporkan</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Initialize map
+    const map = L.map("map").setView([0, 0], 15);
+    let marker;
+    let reportId = 1; // Initialize report ID
+    let reports = []; // Array to store report data
+    let markers = {}; // Object to store markers with reportId as key
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    // Geolocation
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        map.setView([latitude, longitude], 15);
+        marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+        document.getElementById("latitude").value = latitude;
+        document.getElementById("longitude").value = longitude;
+
+        marker.on("dragend", function (e) {
+          const { lat, lng } = e.target.getLatLng();
+          document.getElementById("latitude").value = lat;
+          document.getElementById("longitude").value = lng;
+        });
+      },
+      (error) => {
+        alert("Tidak dapat mengakses lokasi. Pastikan GPS Anda aktif.");
+      }
+    );
+
+    // Photo upload preview
+    const photoInput = document.getElementById("photo");
+    const photoPreview = document.getElementById("photoPreview");
+
+    photoInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Ukuran file foto tidak boleh lebih dari 2MB.");
+          photoInput.value = "";
+          photoPreview.style.display = "none";
+          return;
         }
-      );
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          photoPreview.src = event.target.result;
+          photoPreview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-      // Photo upload preview
-      const photoInput = document.getElementById("photo");
-      const photoPreview = document.getElementById("photoPreview");
+    // Form submission
+    document.getElementById("reportForm").addEventListener("submit", function (e) {
+      e.preventDefault();
 
-      photoInput.addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          if (file.size > 2 * 1024 * 1024) {
-            alert("Ukuran file foto tidak boleh lebih dari 2MB.");
-            photoInput.value = "";
-            photoPreview.style.display = "none";
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = function (event) {
-            photoPreview.src = event.target.result;
-            photoPreview.style.display = "block";
-          };
-          reader.readAsDataURL(file);
-        }
-      });
+      const name = document.getElementById("name").value;
+      const description = document.getElementById("description").value;
+      const damageLevel = document.getElementById("damageLevel").value;
+      const latitude = document.getElementById("latitude").value;
+      const longitude = document.getElementById("longitude").value;
+      const photo = document.getElementById("photo").files[0];
+      const timestamp = new Date().toLocaleString();
 
-      // Form submission
-      document.getElementById("reportForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const name = document.getElementById("name").value;
-        const description = document.getElementById("description").value;
-        const damageLevel = document.getElementById("damageLevel").value;
-        const latitude = document.getElementById("latitude").value;
-        const longitude = document.getElementById("longitude").value;
-        const photo = document.getElementById("photo").files[0];
-        const timestamp = new Date().toLocaleString();
-
-        const popupContent = `
+      const popupContent = `
           <div class="popup-content">
             <img src="infrago-highres-logo.png" alt="Logo" class="logo" /> <!-- Replace with your logo path -->
             <h5>Laporan Kerusakan Jalan #${reportId}</h5>
@@ -249,54 +244,55 @@
           </div>
         `;
 
-        // Add report to the map and store
-        const newMarker = L.marker([latitude, longitude]).addTo(map);
-        newMarker.bindPopup(popupContent).openPopup();
+      // Add report to the map and store
+      const newMarker = L.marker([latitude, longitude]).addTo(map);
+      newMarker.bindPopup(popupContent).openPopup();
 
-        // Store report data and associate the marker with the reportId
-        reports.push({
-          id: reportId,
-          name,
-          description,
-          damageLevel,
-          latitude,
-          longitude,
-          photoSrc: photoPreview.src,
-          timestamp,
-        });
-
-        markers[reportId] = newMarker; // Store marker in markers object with reportId as key
-
-        reportId++; // Increment the report ID
-        alert("Laporan berhasil ditambahkan ke peta!");
-        document.getElementById("reportForm").reset();
-        photoPreview.style.display = "none";
+      // Store report data and associate the marker with the reportId
+      reports.push({
+        id: reportId,
+        name,
+        description,
+        damageLevel,
+        latitude,
+        longitude,
+        photoSrc: photoPreview.src,
+        timestamp,
       });
 
-      // Edit report function
-      function editReport(id) {
-        const report = reports.find((r) => r.id === id);
-        if (report) {
-          alert(`Edit report #${id}: ${JSON.stringify(report)}`);
-        }
-      }
+      markers[reportId] = newMarker; // Store marker in markers object with reportId as key
 
-      // Delete report function
-      function deleteReport(id) {
-        const report = reports.find((r) => r.id === id);
-        if (report) {
-          // Remove the marker associated with the report from the map
-          const markerToRemove = markers[id];
-          if (markerToRemove) {
-            map.removeLayer(markerToRemove);
-            delete markers[id]; // Remove marker from the markers object
-          }
+      reportId++; // Increment the report ID
+      alert("Laporan berhasil ditambahkan ke peta!");
+      document.getElementById("reportForm").reset();
+      photoPreview.style.display = "none";
+    });
 
-          // Remove the report data from the reports array
-          reports = reports.filter((r) => r.id !== id);
-          alert(`Laporan #${id} telah dihapus.`);
-        }
+    // Edit report function
+    function editReport(id) {
+      const report = reports.find((r) => r.id === id);
+      if (report) {
+        alert(`Edit report #${id}: ${JSON.stringify(report)}`);
       }
-    </script>
-  </body>
+    }
+
+    // Delete report function
+    function deleteReport(id) {
+      const report = reports.find((r) => r.id === id);
+      if (report) {
+        // Remove the marker associated with the report from the map
+        const markerToRemove = markers[id];
+        if (markerToRemove) {
+          map.removeLayer(markerToRemove);
+          delete markers[id]; // Remove marker from the markers object
+        }
+
+        // Remove the report data from the reports array
+        reports = reports.filter((r) => r.id !== id);
+        alert(`Laporan #${id} telah dihapus.`);
+      }
+    }
+  </script>
+</body>
+
 </html>
